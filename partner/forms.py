@@ -7,7 +7,7 @@ class PartnerForm(ModelForm):
         model = Partner
         fields = (
             "name",
-            "contract",
+            "contact",
             "address",
             "description",
         )
