@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import Partner
+from .models import Partner, Menu
 
 
-@admin.register(Partner)
+@admin.register(Partner, Menu)
 class PartnerAdmin(admin.ModelAdmin):
     pass
