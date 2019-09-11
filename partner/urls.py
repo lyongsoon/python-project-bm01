@@ -4,7 +4,7 @@ from .views import (
     signup,
     edit_info,
     index, login, logout,
-    menu, menu_add,
+    menu, menu_add, menu_detail,
 )
 
 urlpatterns = [
@@ -17,5 +17,7 @@ urlpatterns = [
     path('edit', edit_info, name="edit"),
     path('menu', menu, name="menu"),
     path('menu/add', menu_add, name="menu_add"),
+    # path('<int:pk>/', views.DetailView.as_view(), name='detail'),
+    path('menu/<int:menu_id>/', menu_detail, name="menu_detail"),
     # url(r'^$', signup, name="signup"),
 ]

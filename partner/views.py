@@ -123,3 +123,10 @@ def menu_add(request):
             ctx.update({"form": form})
 
     return render(request, "menu_add.html", ctx)
+
+
+def menu_detail(request, menu_id):
+    Menu.objects.get(id=menu_id)
+    ctx = { "menu": menu }
+    return render(request, "menu_detail.html", ctx)
+    # pass
