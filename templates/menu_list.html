@@ -3,7 +3,7 @@
 {% include "navbar.html" %}
 <div class="container">
     <div class="col-sm-6 col-sm-offset-3">
-        menu list
+        <h2>메뉴 입니다. </h2>
         <table class="table">
             <tr>
                 <th>이미지</th>
@@ -12,7 +12,7 @@
             </tr>
             {% for menu in menu_list %}
             <tr>
-                <td>{{ menu.image }}</td>
+                <td><img style="max-with:50px;" src="{{ menu.image.url }}"></td>
                 <td>{{ menu.name }}</td>
                 <td>{{ menu.price }}</td>
 <!--            <div>{{ menu.image }}</div>-->
