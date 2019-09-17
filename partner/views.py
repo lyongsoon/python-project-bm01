@@ -109,6 +109,7 @@ def menu(request):
 
 def menu_add(request):
     ctx = {}
+
     if request.method == "GET":
         form = MenuForm()
         ctx.update({"form": form})
@@ -126,7 +127,26 @@ def menu_add(request):
 
 
 def menu_detail(request, menu_id):
-    Menu.objects.get(id=menu_id)
-    ctx = { "menu": menu }
+    menu = Menu.objects.get(id=menu_id)
+    ctx = {"menu": menu}
     return render(request, "menu_detail.html", ctx)
-    # pass
+
+
+def menu_edit(request, menu_id):
+    ctx = {"replacement": "수정"}
+    menu = Menu.objects.get(id=menu_id)
+
+    if request.method == "GET":
+        form = MenuForm(instance=menu)
+        ctx.update({"form": form})
+    elif request.method == "POST":
+        form = MenuForm(request.POST, request.FILES, instance=menu)
+        if form.is_valid():
+            menu = form.save(commit=False)
+            menu.partner = request.user.partner
+            menu.save()
+            return redirect("/partner/menu")
+        else:
+            ctx.update({"form": form})
+
+    return render(request, "menu_add.html", ctx)
