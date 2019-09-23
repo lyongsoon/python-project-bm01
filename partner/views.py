@@ -1,13 +1,19 @@
-from django.contrib.auth import (
-    authenticate,
-    login as auth_login,
-    logout as auth_logout,
-)
-from django.contrib.auth.models import User
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 
+
+# from src.client.views import common_login, common_signup
+from client.views import common_login, common_signup
 from .models import Menu
 from .forms import PartnerForm, MenuForm
+
+URL_LOGIN = '/partner/login'
+
+
+def partner_group_check(user):
+    return "partner" in user.groups.all()
 
 
 # Create your views here.
@@ -33,40 +39,12 @@ def index(request):
 
 def login(request):
     ctx = {}
-    if request.method == "GET":
-        pass
-    elif request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            auth_login(request, user)
-            # Redirect to a success page.
-            return redirect("/partner/")
-        else:
-            # Return an 'invalid login' error message.
-            ctx.update({"error": "사용자가 없습니다. "})
-
-    return render(request, "login.html", ctx)
+    return common_login(request, ctx, "partner")
 
 
 def signup(request):
-    if request.method == "GET":
-        pass
-    elif request.method == "POST":
-        username = request.POST.get("username")
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-
-        # 유저생성
-        user = User.objects.create_user(username, email, password)
-
-        # 장고 User 메서드를 상용하지 않을 경우 아래와 같이 유저 생성
-        # Article.object.create(title="", content="")
-
-        # print(username, email, password)
     ctx = {}
-    return render(request, "signup.html", ctx)
+    return common_signup(request, ctx, "partner")
 
 
 def logout(request):
@@ -74,6 +52,7 @@ def logout(request):
     return redirect("/partner/")
 
 
+@login_required(login_url=URL_LOGIN)
 def edit_info(request):
     ctx = {}
     # Article.objects.all() % query
@@ -99,16 +78,27 @@ def edit_info(request):
     return render(request, "edit_info.html", ctx)
 
 
+# Case 1 : 파트너 오브젝트가 없을 경우 즉 로그인 하지 않고 접근하려고 할 경우
+@login_required(login_url=URL_LOGIN)
 def menu(request):
     ctx = {}
 
+    # Case 2 : 파트너 오브젝트가 없을 경우 즉 로그인 하지 않고 접근하려고 할 경우
+    # if request.user.is_anonymous or request.user.partner is None:
+    #     return redirect("/partner")
     menu_list = Menu.objects.filter(partner=request.user.partner)
     ctx.update({"menu_list": menu_list})
     return render(request, "menu_list.html", ctx)
 
 
+@login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_add(request):
     ctx = {}
+
+    # # partner 객체가 유저그룹에 있느지 체크, 없을 경우 홈 페이지로 이동
+    # if "partner" not in request.user.groups.all():
+    #     return redirect("/")
 
     if request.method == "GET":
         form = MenuForm()
@@ -126,25 +116,27 @@ def menu_add(request):
     return render(request, "menu_add.html", ctx)
 
 
+@login_required(login_url=URL_LOGIN)
 def menu_detail(request, menu_id):
-    menu = Menu.objects.get(id=menu_id)
-    ctx = {"menu": menu}
+    lv_menu = Menu.objects.get(id=menu_id)
+    ctx = {"menu": lv_menu}
     return render(request, "menu_detail.html", ctx)
 
 
+@login_required(login_url=URL_LOGIN)
 def menu_edit(request, menu_id):
     ctx = {"replacement": "수정"}
-    menu = Menu.objects.get(id=menu_id)
+    lv_menu = Menu.objects.get(id=menu_id)
 
     if request.method == "GET":
-        form = MenuForm(instance=menu)
+        form = MenuForm(instance=lv_menu)
         ctx.update({"form": form})
     elif request.method == "POST":
-        form = MenuForm(request.POST, request.FILES, instance=menu)
+        form = MenuForm(request.POST, request.FILES, instance=lv_menu)
         if form.is_valid():
-            menu = form.save(commit=False)
-            menu.partner = request.user.partner
-            menu.save()
+            lv_menu = form.save(commit=False)
+            lv_menu.partner = request.user.partner
+            lv_menu.save()
             return redirect("/partner/menu")
         else:
             ctx.update({"form": form})
@@ -152,7 +144,8 @@ def menu_edit(request, menu_id):
     return render(request, "menu_add.html", ctx)
 
 
+@login_required(login_url=URL_LOGIN)
 def menu_delete(request, menu_id):
-    menu = Menu.objects.get(id=menu_id)
-    menu.delete()
+    lv_menu = Menu.objects.get(id=menu_id)
+    lv_menu.delete()
     return redirect("/partner/menu")
