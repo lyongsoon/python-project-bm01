@@ -53,6 +53,7 @@ def logout(request):
 
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def edit_info(request):
     ctx = {}
     # Article.objects.all() % query
@@ -80,6 +81,7 @@ def edit_info(request):
 
 # Case 1 : 파트너 오브젝트가 없을 경우 즉 로그인 하지 않고 접근하려고 할 경우
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu(request):
     ctx = {}
 
@@ -117,6 +119,7 @@ def menu_add(request):
 
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_detail(request, menu_id):
     lv_menu = Menu.objects.get(id=menu_id)
     ctx = {"menu": lv_menu}
@@ -124,6 +127,7 @@ def menu_detail(request, menu_id):
 
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_edit(request, menu_id):
     ctx = {"replacement": "수정"}
     lv_menu = Menu.objects.get(id=menu_id)
@@ -145,6 +149,7 @@ def menu_edit(request, menu_id):
 
 
 @login_required(login_url=URL_LOGIN)
+@user_passes_test(partner_group_check, login_url=URL_LOGIN)
 def menu_delete(request, menu_id):
     lv_menu = Menu.objects.get(id=menu_id)
     lv_menu.delete()
