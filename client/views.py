@@ -6,10 +6,8 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect
 
 # from src.partner.models import Partner
-
-# from src.partner.models import Partner
-from partner.models import Partner
-from .models import Client
+from partner.models import Partner, Menu
+from client.models import Client, Order, OrderItem
 
 
 def index(request):
@@ -91,3 +89,44 @@ def common_signup(request, ctx, group):
 def signup(request):
     ctx = {"is_client": True}
     return common_signup(request, ctx, "client")
+
+
+def order(request, partner_id):
+    ctx = {}
+
+    partner = Partner.objects.get(id=partner_id)
+    menu_list = Menu.objects.filter(partner=partner)
+    if request.method == "GET":
+        ctx.update({
+            "partner": partner,
+            "menu_list": menu_list,
+        })
+    elif request.method == "POST":
+
+        # # CASE2
+        order = Order.objects.create(
+            Client=request.user.client,
+            address="test",
+        )
+        for menu in menu_list:
+            menu_count = request.POST.get(str(menu.id))
+            menu_count = int(menu_count)
+            if menu_count > 0:
+                item = OrderItem.objects.create(
+                    order=order,
+                    menu=menu,
+                    count=menu_count
+                )
+                # order.items.add(item)
+
+        return redirect("/")
+
+        # # CASE1
+        # menu_dict = {}
+        # for menu in menu_list:
+        #     # menu.id 를 String 으로 Casting
+        #     # menu_count = request.POST.get("{}".format(menu.id))
+        #     menu_count = request.POST.get(str(menu.id))
+        #     if int(menu_count) > 0:
+        #         menu_dict.update({str(menu.id): menu_count})
+    return render(request, "order_menu_list.html", ctx)

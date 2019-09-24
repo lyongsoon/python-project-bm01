@@ -20,9 +20,16 @@ class Order(models.Model):
         max_length=100,
         verbose_name="주소",  # 한글 레이블 출력
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        # max_length=100,
-        # verbose_name="주문 시간",  # 한글 레이블 출력
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    items = models.ManyToManyField(
+        Menu,
+        through='OrderItem',    # OrderItem 클라스는 본 클라스 생성 후 생성되는 크라스라서 스트링으로 표시
+        through_fields=('order', 'menu'),
     )
-    items = models.ManyToManyField(Menu)
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    count = models.PositiveSmallIntegerField()
