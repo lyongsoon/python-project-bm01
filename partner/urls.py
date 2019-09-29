@@ -5,6 +5,7 @@ from .views import (
     edit_info,
     index, login, logout,
     menu, menu_add, menu_detail, menu_edit, menu_delete,
+    order,
 )
 
 urlpatterns = [
@@ -22,4 +23,5 @@ urlpatterns = [
     path('menu/<int:menu_id>/edit/', menu_edit, name="menu_edit"),
     path('menu/<int:menu_id>/delete/', menu_delete, name="menu_delete"),
     # url(r'^$', signup, name="signup"),
+    path('order', order, name="order"),
 ]
